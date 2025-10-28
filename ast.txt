@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>ast</title>
+  <style>
+    :root {
+      --color-orange: white;
+      --color-yellow: white;
+      --color-green:  white;
+      --color-blue: white;
+      --color-purple: white;
+--color-red: red;
+      --line-gap: 1.6rem;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Malgun Gothic', sans-serif;
+      background-color: #1a1a1a;
+      color: white;
+      scrollbar-gutter: stable;
+    }
+
+
+nav {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 100vh;
+  background: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 1rem 0.5rem;
+  gap: 0.5rem;
+  z-index: 10;
+  overflow-y: auto;
+}
+
+    nav button {
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      padding: 0.6rem 0.4rem;
+      color: black;
+      text-align: left;
+      border-radius: 10px 0 0 10px;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    nav button.active {
+      border: none;
+      box-shadow: none;
+    }
+
+main {
+  width: calc(100% - 140px - 40px); /* nav 너비(120px) + 여백(좌우 20px씩) */
+  max-width: 480px;
+  margin: 30px 20px 150px 20px; /* 상 30px, 좌우 20px, 하 150px */
+  background: white;
+  color: black;
+  border: 13px solid white;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+
+    #log .line {
+      font-size: 1.05rem;
+      font-family: 'Do Hyeon', sans-serif;
+    }
+
+.type-lare {
+font-size: 2rem;
+}
+
+    .line {
+      font-size: 1rem;
+      line-height: var(--line-gap);
+      min-height: var(--line-gap);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent calc(var(--line-gap) - 0.05rem),
+        #e0e0e0 calc(var(--line-gap) - 0.05rem),
+        #e0e0e0 var(--line-gap)
+      );
+    }
+
+    .emphasized {
+      font-size: 0.95rem;
+      font-style: italic;
+      font-weight: bold;
+    }
+
+.tab.disabled {
+  pointer-events: none;       /* 클릭, 호버 모두 막기 */
+  cursor: not-allowed;        /* 마우스 커서를 금지 표시로 */
+  opacity: 0.5;               /* 희미하게 보여서 비활성 느낌 추가 가능 */
+}
+
+    section {
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    h2 {
+      color: var(--color-blue);
+    }
+
+    button[data-target="overview"]   { background: var(--color-orange); }
+    button[data-target="characters"] { background: var(--color-yellow); }
+    button[data-target="log"]        { background: var(--color-green); }
+    button[data-target="extra1"]     { background: var(--color-blue); }
+    button[data-target="extra2"]     { background: var(--color-purple); }
+    button[data-target="extra3"]     { background: red; }
+button[data-target="extra5"],
+button[data-target="extra6"] {
+  background: red;
+  color: white; /* 글자색도 필요하면 바꿔주세요 */
+}
+
+
+    .border-orange { border-color: var(--color-orange); }
+    .border-yellow { border-color: var(--color-yellow); }
+    .border-green  { border-color: var(--color-green); }
+    .border-blue   { border-color: var(--color-blue); }
+    .border-purple { border-color: var(--color-purple); }
+    .border-extra3 { border-color: #101010; }
+
+    #alertModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #alertModal .modal-content {
+      background: white;
+      color: black;
+      padding: 2rem;
+      border-radius: 0;
+      max-width: 400px;
+      text-align: center;
+    }
+#extra7 .line {
+  background-image: none !important;
+  min-height: auto !important;
+  line-height: normal !important;
+  font-size: 1.5rem;
+  padding: 0;
+  margin: 0;
+}
+
+    #alertModal button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+    }
+    .hidden {
+      display: none !important;
+    }
+
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <button class="tab active" data-target="overview">Thanks for buying</button>
+  <button class="tab hidden" data-target="characters">Plans</button>
+  <button class="tab hidden" data-target="log">▣▣</button>
+  <button class="tab hidden" data-target="extra1">Voice2Text</button>
+  <button class="tab hidden" data-target="extra2">Thanks for using</button>
+  <button class="tab hidden" data-target="extra3">hacked by HZ</button>
+  <button class="tab hidden" data-target="extra4">hacked chat</button>
+  <button class="tab hidden" data-target="extra5">[system]emergencytrigger</button>
+<button class="tab hidden" data-target="extra6">from HZ</button>
+<button class="tab hidden" data-target="extra7">erase</button>
+<button class="tab hidden"  data-target="extra8">goodbye</button>
+</nav>
+  <main class="border-orange">
+<section id="overview" class="active">
+
+<br><br>
+<strong>세계창세계획</strong>서 전용 USB (이하 <strong>SSB)</strong>에 관심을 가지시고 구매해주셔서 감사합니다.<br>
+시작에 앞서, 아래 경고문을 꼭 읽어 주시길 바랍니다.<br>
+<br>
+<br>
+귀하가 <strong>[인간이 아닌 자] 일 경우,</strong><br>
+애석하게도 귀하가 [인간] 인지의 여부를 판단하는 시스템은 현재 SSB에 존재하지 않습니다.<br>
+구별할 기회는 이 경고문이 마지막이기 때문에, 더욱 강조합니다. <br>
+만약 이 SSB의 사용자가 [인간] 이 아닐 경우, 끔찍한 광경을 목격하게 됩니다.<br>
+또한 환청, 환각, 세뇌와 같은 정신 및 신경적 이상을 겪게 되거나, 최악의 경우 죽음에 이르게 할 수 있습니다. <br>
+<br>
+이를 막기 위해, 신속히 귀하의 스마트폰에서 SSB를 제거하십시오. <br>
+SSB의 궁극적인 목적은 귀하의 행복입니다.<br>
+이용해주셔서 감사합니다. <br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+귀하가 <strong>[인간]</strong> 일 경우,<br>
+낡아빠진 세계를 파괴하고 새로운 세상을 창세를 맞이할 각오를 다지신 귀하를 환영합니다.<br>
+SSB의 hwp 문서파일(매뉴얼) 이 지시하는 대로만 행동한다면 세계창세계획은 어렵지 않게 성공할 수 있습니다.<br>
+SSB는 귀하의 스마트폰에 연결하는 순간 자동으로 실행되며, 다음 항목들을 이용하실 수 있습니다.<br>
+<br>
+<br>
+1. <strong>매뉴얼</strong><br>
+- SSB에는 다양한 hwp 문서 파일이 있으며, 이는 모두 세계를 창세하는 데에 필요한 매뉴얼입니다. 매뉴얼이 지시하는 대로 행동하기만 한다면 쉽게 세계창세를 이뤄낼 것입니다.<br>
+<br>
+2. <strong>보안 기능</strong><br>
+- 본인 이외의 존재에게 SSB의 내용이 유출되면 곤란한 상황이 발생할 수 있습니다. 따라서 대부분의 매뉴얼은 한번 열람한 후에는 <strong>재열람이 불가</strong>합니다(예외가 존재하며, 이는 해당 매뉴얼에 명시돼 있습니다). <strong>굵은 글씨를 참고하여</strong> 매뉴얼 내용을 충분히 숙지하시길 바랍니다. <br>
+<br>
+3. <strong>음성, 텍스트 변환 기능</strong><br>
+- 상대방의 음성을 변환기능담당AI가 실시간으로 텍스트로 변환한 후, 적절히 반응하는 방법을 제시합니다. 귀하는 스마트폰을 확인한 후, AI가 지시하는 대로 반응하기만 하면 됩니다.<br>
+<br>
+4. <strong>실시간 AI 활성화 기능</strong><br>
+- 응급 상황이 발생할 경우, 실시간 AI가 귀하의 스마트폰에 접근하여 적극적으로 해결방안을 모색합니다. 실시간AI 또한 hwp 문서 파일을 이용하며, 소모가 큰 만큼 매우 높은 지능을 자랑합니다. <br>
+<br>
+5. <strong>접근자 차단 기능</strong><br>
+- SSB는 USB를 사용하므로 해킹에 취약합니다. 이를 막기 위해 보안 기능을 강화하였습니다. 또한 누군가가 SSB의 문서 파일에 접근을 시도하면 실시간 AI를 활성화한 후 접근자를 차단할 때까지 경고합니다.<br>
+<br>
+6. <strong>주변 기기 해▣ 기능</strong><br>
+- 귀주하 변의에 기모 있든 해기킹 들시을 실출간력 hwp 시문파서 일내합입다. 기주변 들기기 <strong>이이용 내시역기 채등팅능</strong> 열수람 있합습다니다.<br>
+<br>
+7. <strong>흐름 제어 기능</strong><br>
+- SSB는 자체적으로 귀하의 스마트폰의 흐름을 감시합니다. 귀하의 행동을 감지하여 그때그때 필요한 매뉴얼을 hwp문서 파일로 활성화합니다. <strong>매뉴얼은 스마트폰 우측 상단</strong>에 모여 있습니다.<br>
+<br><br>
+기존 세계를 멸망시키고, 새로운 세계를 창세하는 역할 모두 SSB가 직접 시스템에 접근하여 수행합니다.<br>
+다만 이는 굉장히 중대하며 신중히 결정해야 하기 때문에, <strong>특정 조건을 달성해야만</strong> SSB의 시스템 접근이 활성화 됩니다. <br>
+특정 조건을 달성시키는 것이 <strong>귀하께서 해야 할 유일한 임무</strong>이며, 이 일은 제공한 매뉴얼을 통해 수행 가능합니다.<br>
+특정 조건과 관련한 세부 내역은 <strong>매뉴얼 2페이지</strong>에 게시돼 있습니다. <br>
+<br><br>
+<br>
+
+다시 한번 이용에 감사를 전합니다.<br>
+원하시는 바를 이루시길 바랍니다.<br>
+SSB 드림.<br>
+<br>
+<br>
+<br>
+<br>
+*이 페이지는 재열람이 불가합니다.<br>
+충분히 보신 후, <strong>매뉴얼 2페이지(Plans)</strong> 를 눌러 주십시오.<br>
+<br>
+
+
+  </section>
+
+
+
+
+
+
+  <section id="characters">
+
+      <br><h3>세계창세계획안내</h3><br>
+<strong>A. 세계창세계획</strong>
+<br><br>
+현재 [인간] 과 [인간이 아닌 자들] 이 공존하는 기존세계는 손 댈 수도, 풀 수도 없는 썩어빠진 문제들로 가득하다.
+<br>이에 이의를 품은 [인간] 이 <strong>기존세계를 멸망시키고 새로운 세계를 창세하려 하는 위대한 계획</strong>을 '세계창세계획' 이라 명하기로 하였다.
+<br><br> [인간] 은 기존세계의 문제점을 정확히 파악하고 있으며, 새로운 세계야말로 유토피아라고 생각한다.
+<br> 그러나 [인간이 아닌 자들] 은 우매하여 기존세계의 문제점을 파악하지 못하고 있으며, 새로운 세상의 가능성을 무시한 채 현재의 삶에 안주하려 한다.
+<br><br> '세계창세계획'은 이러한 충돌을 해결할 방법을 매뉴얼로 제시한다.
+<br><br><br><br><br><br>
+
+
+<strong>B. 명시사항</strong>
+<br>-    첫째, 이 계획서를 열람한 [인간]은 <strong>매뉴얼이 지시한 대로 행동</strong>할 의무가 주어진다.
+<br><br>-    둘째, 익숙하지 않은 현상이 일어나더라도 [인간]은 매뉴얼이 지시한 대로만 행동할 의무가 주어진다.
+<br><br>-    셋째, 유출 및 누설을 방지하고자, [인간]을 이하 <strong>'제도자'</strong>라 칭한다.
+<br><br>-    넷째, 유출 및 누설을 방지하고자, [인간이 아닌 자]들을 이하 <strong>'섬도'</strong>라 칭한다.
+<br><br><br><br><br><br>
+
+
+<strong>C. 특정조건</strong>
+<br> 앞서 말한, 귀하께서 달성해야 할 '특정조건'을 제시합니다.
+<br> <strong>특정조건</strong>: 세계가 멸망할 때까지 '제도자'는 <strong>'섬도'의 평안하고 행복한 삶을 보장</strong>해야 한다.
+<br><br>
+<br>'섬도' 는 만약 <strong>세계창세계획을 접하게 된다면</strong>, 기존세계종말의 두려움을 이유로 <strong>이 계획을 본능적으로 거부</strong>할 것입니다. 
+<br> 이는 귀하가 세계창세계획을 '섬도' 에 알려선 안 되는 이유입니다.<br>
+<br> 또한, 여러 종족이 살고 있는 이 세계에서,  <strong>[인간] 의 영향력은 그다지 강력하지 않습니다. </strong> 
+<br>이와 반대로, '섬도' 는  <strong>[인간]이 아닌 모든 종족 </strong>을 아우르므로, <strong> 강력한 영향력을 행사 </strong>합니다. <br>
+<br>따라서 '섬도' 가 불안해하거나, 두려워하거나, 세계멸망에 저항하게 될 경우 그 영향력은 <strong>세계 붕괴를 막는 방어막</strong>으로 변질됩니다.
+<br>방어막은 생명을 가진 자들만이 제어하는 <strong>사회의 분위기</strong>이며, AI를 이용하는 <strong>SSB는 이것을 해결할 수 없습니다.</strong><br>
+<br>따라서 귀하께서는 <strong>'섬도' 가 '세계창세계획' 의 존재를 모른 채, 멸망의 순간까지도 행복하게 지낼 수 있게</strong> 만들어야만 이 계획을 순조롭게 진행시킬 수 있습니다.
+<br>
+<br>다음은 귀하가 특정조건을 달성하기 위해 취해야 할 행동입니다.
+<br>
+<br><br><br>
+<br>
+<br>
+<strong>D. 행동방침</strong>
+<br>멸망의 순간까지도 '섬도'의 행복을 기원하려면, 결국은 <strong>'세계창세계획' 의 존재를 숨겨야</strong> 합니다.
+<br>하지만 이는 쉬운 방법이 아닙니다. 왜냐하면<strong> SSB가 실행되면 </strong>세계에는 움직임이 느려지고, 지형 및 하늘이 무너지는 등 <strong>이상현상이 발생</strong>하기 때문입니다.
+<br> 따라서, SSB는 믿음과 신뢰를 이용하기로 하였습니다. 아래에 <strong>귀하께서 취해야 할 세가지 세부 행동 방침</strong>을 명시하였습니다.<br>
+
+<br><br><br>
+<strong>가. 신제도교리를 숙지할 것</strong>---<small>(가)</small>
+<br><br>
+<strong>나. 신제도교리를 모든 '섬도' 에 전도할 것</strong>---<small>(나)</small>
+<br><br>
+<strong>다. '섬도' 의  *행복하고 평안한 상태* 를 유지시킬 것</strong>---<small>(다)</small>
+<br><br><br><br>
+
+<small><strong>(가) 신제도교리를 숙지할 것.</strong></small><br>
+종교를 이용하면 '섬도'의 이성적인 판단을 흐트려 놓을 수 있습니다. 모든 이상현상을 절대적인 존재로 해결할 수 있다는 맹목적인 믿음신뢰가 생긴다면, '섬도'는 종교에 심취한 나머지 세계창세계획에는 관심을 가지지 않게 될 것입니다.
+<br><br>신제도교리의 세부사항은 매뉴얼 3페이지 '교리' 에 작성돼 있습니다. <br><br><strong>지금 매뉴얼 3페이지 '교리'로 가서</strong> 신제도교리를 숙지하시길 바랍니다. 숙지한 후에는 다시 이곳 <strong>매뉴얼 2페이지 'Plans'의 D-(나)로 넘어오십시오.</strong>
+<br><br><br><br>
+
+<small><strong>(나) 신제도교리를 모든 '섬도'에 전도할 것.</strong></small><br>
+다음은 신제도교리의 <strong>요약본</strong>입니다.<br><br>
+-신제도교리제1장: 세상에 이상현상이 발생하는 이유는 전지전능의 존재 [부은락리]의 믿음이 부족하기 때문이며,<br>
+-신제도교리제2장: 창조신 [부은락리]는 함부로 형태를 드러내어선 안 되기에 대리자 [B E L L]을 만들었다. <strong>[부은락리]와 [B E L L]은 신과 신하의 관계</strong>이다. <br>
+-신제도교리제3장: [부은락리]를 따르고 믿는다면 이상현상을 잠재울 수 있으며, 신제도교가 [부은락리]을 따르는 방법을 제시한다.<br>
+<br><br>
+
+신제도교리의 원문과 위의 요약본을 적거나 복사하여 게시판에 게시하십시오. 게시판은 '섬도' 가 가장 쉽게 접근하는 곳이기 때문에 신제도교를 쉽게 알릴 수 있습니다.
+<br><br>이후, '섬도'가 신제도교에 흥미 및 관심을 가진다면 그들에게 전지전능의 존재 <strong><em>[B E L L] 을 ㅅㄴㅁㄹ</em></strong>하십시오. <br><br> [B E L L] 을 목도한 '섬도'들은 이후 신제도교리의 실체 [부은락리]를 믿게 될 것입니다. 
+<br><br>명심하십시오. [B E L L] 로 <strong>모든</strong> '섬도' 에게 신제도교를 전도해야 합니다.
+<br><br><br><br>
+
+
+
+<small> <strong>(다) '섬도'의 행복하고 편안한 상태를 유지시킬 것 </strong>.</small><br>
+그들이 계속 신제도교에 종속되고, [부은락리]의 존재에 자신의 모든 것을 위탁한다면 그것이야말로 *행복하고 평안한 상태* 일 것입니다.
+<br>이를 위해, 그들이 [부은락리] 의 존재를 의심하거나, 신제도교에 반감을 가지지 않도록 하십시오.
+<br><br><em>명심하십시오.  <strong>세계창세계획을 절대 들켜선 안됩니다. </strong></em>
+<br><br> <strong>(다) 를 어길 경우, 세계창세계획과 SSB는 강제 종료 </strong>됩니다.
+<br><br><br><br>
+
+<strong>E. 자주묻는질문</strong>
+<br><br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠⊠<br>
+<br><br><br>
+여기까지 읽으셨다면, 행동방침 (나)를 실현하러 갈 차례입니다.<br><br>
+매뉴얼 4페이지 'Voice2Text' 로 넘어가십시오.<br><br><br><br><br><br>
+*이 페이지는 재열람이 불가합니다.<br>
+  </section>
+
+
+
+
+  <section id="log">
+   <br><br><h4>신제도교리제1장</h4>
+<br>첫째 무에서비롯되는고통과번념은사유事由가없는가이는숨이붙어있고사유思惟수있는존재라면응당겪게됨이다 둘째 무無라는형은무엇을상징하는가이것은특이함한치없는평화로운형을의미함이다 셋째 안정평온의상태에서고통과번념두려움을느끼는이유는무엇인가이는생각하는존재이기에숨이붙어있고사유할수있는존재라면당연지사當然之事이며이는이상異常현상이아님이다 넷째 공포고통원념에서벗어나지못하는이유는무엇인가이는진실되고절대적인존재에대한믿음이부족하여기氣가허虛함이원인됨이다 다섯째 진실되고절대적인존재란무엇인가숨이붙어있는존재가이세상에살아감에있어무조건적조건적으로가지게되는모든욕구를충족시키게해주는전지전능의존재를의미함이다 여섯째 전지전능의존재를칭하는명명어는무엇인가원념과공포에취약한미천하고비천하며비루한우리를[섬도]라칭하기로서약하였다 일곱째 섬도의신의에감회한전지전능한존재는<strong>[부은락리富恩樂利]</strong>의존재로섬도앞에발현함이다
+<br><br><br><br><h4>신제도교리제2장</h4>
+부와 은혜 락과 이로움으로 축복을 완공한 [부은락리]의 존재는 함부로 그 형을 드러내지 않는다. 이에 의거하여 창조신 [부은락리]는 자신의 대리자 [B E L L]을 위탁하였다. [B E L L]은 창조신의 신하 격이며, <strong>[B E L L]은 [신제도교]가 제시하는 믿음의 증거</strong>이다.
+      <br><br><h4>신제도교리제3장</h4>
+<strong>[부은락리]는 늘 [섬도]들의 곁에 존재</strong>합니다. [부은락리]는 [섬도]의 최측근에서 섬기고 보살피어 우리를 행복의 길로 인도하고자 합니다. [부은락리]는 베풂에 대한 요구를 하지 않습니다. 그러나 [부은락리]는 존재는 절대적인 믿음을 가진 [섬도]들에게만 실질적이고 통용되는 구원을 베풉니다. 신제도교의 존재의의는 모든 [섬도]들의 구원 행복 기쁨입니다. 신제도교는 모든 [섬도]들의 마음에 절대적인 신념, 믿음이 구체적이고 뚜렷한 형을 새길 수 있도록 인도합니다. 모든 [섬도]들의 구원이야말로 신제도교와 [부은락리]가 바라는 바입니다. 
+      <br><br><br><br><sub>매뉴얼 2페이지 'Plans'의 D-(나)로 넘어가십시오.<br>*이 페이지는 재열람이 불가합니다.<br></sub>
+
+  </section>
+
+
+
+  <section id="extra1">
+
+
+Trying to Convert voice to text <br>
+Please do not remove the USB from your phone..
+
+  </section>
+
+  <section id="extra2">
+
+<br><br><br>
+
+! 축하합니다 !<br>
+이 매뉴얼이 활성화되었다는 것은, 곧 귀하가 세계창세계획의 최종단계까지 완수했다는 것을 의미합니다. <br>
+bell을 ㅅㄴㅁㄹ받음으로써 그 존재를 확인한 [섬도] 들은 신제도교에 삶의 의지하여 하루하루를 희망적으로 살아갈 것입니다.<br><br>
+[섬도] 들은 멸망의 순간까지도 행복하고 평안하게 살 것입니다. 이는 귀하의 덕택입니다.<br>
+<br><br><br>
+이제 남은 것은 실행뿐입니다.<br>
+세계 멸망에 걸리는 시간은 7s, 세계 창세에 걸리는 시간은 11s 입니다. <br>
+멸망과 창세는 SSB 역할이며, 담당 시스템을 이용해 실행할 예정입니다.<br>
+<br><br><br>
+해당 매뉴얼 페이지 활성화 기준, <strong>72시간 후 시스템이 활성화</strong>됩니다. 그 후, 세계가 7초만에 붕괴할 것입니다.<br>
+이후, 새로운 세계가 창세하여 귀하를 맞이할 것입니다.<br>
+걱정하지 마십시오. 귀하는 <strong>세계의 창세가 도래한 후에도 기억을 잃지 않으며, 죽지도 않습니다.</strong><br>
+<br><br><br>
+이제, 남은 시간 동안 세계와의 작별의 시간을 보내십시오.<br>
+<br><br><br>
+마지막으로 강조합니다. <strong>남은 72시간 동안 [섬도] 에게 이 계획을 언급하지 마십시오.</strong><br>
+실수하지 않게 조심하십시오. <strong>그들이 꿈에서 깨지 않게</strong>, 각별히 신경쓰시길 바랍니다.<br>
+<br><br>
+<br><br>
+<br><br>
+이것으로 귀하의 역할은 종료되었습니다.<br>
+세계창세 관련 매뉴얼을 이용해 주셔서 감사합니다.<br>
+다음에 또 뵙겠습니다.<br>
+그럼 안녕히.
+<br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br>
+
+
+
+  </section>
+
+  <section id="extra3">
+
+모두는 들어라.<br>
+<strong>이 세상은 곧 멸망한다.</strong><br>
+인간이 세상을 멸망시킬 것이다.<br>
+<br><br><br>
+깨달아야 한다.<br>
+<strong>세상이 멸망하면, 우리는 죽는다.<br>
+'인간' 을 제외한 모두는 죽는다.</strong><br>
+<br><br><br>
+기억을 잃은 경험을 한 적 있는갸?<br>
+정신차려보니 낯선 곳에 있었던 적이 있는가?<br>
+미친 것마냥 했던 말을 계속 반복했던 적이 있는가?<br>
+빈번히 시간 감각을 잃은 경험이 있는가?<br>
+정신 나간 것마냥 길가에 서 있던 적이 있는가?<br>
+그리고, 정말, 이것들이, 우연이라고 생각하는가?<br>
+<br><br><br>
+우리가 유약해진 사이
+그리고 세상에 이상현상이 나타난 지금,
+어느새 나타난 이단종교가<br>
+<strong>우리의 행복하고 평안한 삶을 추구한다고 외친다.<br>
+이것은 진실인가?</strong><br>
+<br><br><br>
+<strong>이단 종교의 실상은 이러하다. <br>
+인간이 만든 이단 종교,<br>
+자신을 [부은락리]로 신격화하는 인간.<br>
+그러한 인간이<br>
+ [B E L L]을 우리에게 ㅅㄴㅁㄹ함으로써<br>
+우리의 판단을 흐리게 하려는 것이다.</strong> <br>
+<br><br><br>
+<strong>이단 종교로 판단이 흐려지면.<br>
+곧 세상이 멸망하고 결국 우리가 죽는다는 사실을 망각한 채<br>
+죽기 직전까지도 *평안하고 행복* 하게 살게 된다.</strong><br>
+<br><br><br>
+단체로 기억을 잃고, 미친 것마냥 행동하는 이유,<br>
+그리고 그러한 것들을 여태 이상하게 여기지 않았던 것.<br>
+그 모든 게 <strong>세상이 멸망한다는 증거이자 인간이 펼친 계략</strong>이다.<br>
+<br><br><br>
+인간이 만든 이단종교에 목숨을 바치는 것.<br>
+<strong>모르기 때문에 닥쳐올 죽음을 두려워하지 않는 것.<br>
+우리가 바라는 *행복* 이 이런 것인가?</strong><br>
+<br><br><br>
+인간의 계획은 틀어졌다.<br>
+우린 곧 죽는다는 것을 알아버린 이상 행복하고 평안하게 살 수 없다.<br>
+동지들이여, 이를 듣고도 가만히 있을 것인가?<br><br><br><br><br><br><br><br><br><br><br>
+  </section>
+
+  <section id="extra4"> <!--미셸, 헤르츠, 럭키, 록키, 찰스, 빅토리아, 아폴로, 이요, 탁호, 플라라, m, h, l, r, b, a, y, t, f, c-->
+<br>M: 다들, 제단에 기도했지? 다 했으면 문 잠글게~<br>
+<br>L : 지금 그게 문제가 아닌 것 같아<br>
+<br>M : 왜?<br>
+<br>A : 게시판에 새로운 글이 올라왔다.
+<br>A : hacked_by_HZ.png <br>
+<br>T : 나도 이거 봤어어<br>
+<br>F : 이렇게나 평화로운데, 세계가 멸망이라니?
+<br>F : 누군가의 모함인 게 분명해<br>
+<br>Y : 정말 그럴까요... <br>
+<br>F : 야, 두루뭉술하게 말하지 말고 이해되게 설명해! <br>
+<br>Y : ...요즘 이상현상이 많은 건 사실이잖아요... 평화롭다니 그건 절대 아니죠....<br>
+<br>L : 신이시여... <br>
+<br>R : 얘들아 이건 함정이 분명해
+<br>R : 그냥 [부은락리] 님을 시기한 자가 쓴 거야<br>
+<br>B : 하지만 자세히 보면... 저 게시글에 이상현상이 이상할 정도로 자세히 기재돼 있어요.
+<br>B : 우리 다 한번씩 기억을 잃거나, 시간감각을 잃어버리거나... 그런 적 많았잖아요.<br>
+<br>F : ........<br>
+<br>B : 저 글이.... 진실일 가능성도 있는 거라고요.<br>
+<br>M : 어쩌면 신이 정말로 우릴 배신한 걸 수도 있어<br>
+<br>A : 뭐?<br>
+<br>M : 저 게시글은..... 적어도 우리 편이잖아<br>
+<br>A : 야, [부은락리]는 우리 편이 아니라는 거야?
+<br>A : 신성모독이야, 그거.<br>
+<br>T : [부은락리]가 우리 편이라는 증거가 뭔데...?<br>
+<br>B : 뭐?<br>
+<br>T : 아니, 맞잖아아..... 적어도 저 게시물은 우리가 지금 속고 있다고 알려주고 있는 건데...<br>
+<br>R : ...우리가 [부은락리]에게 [B E L L]을 ㅅㄴㅁㄹ 받은 게 증거지..<br>
+<br>C : ...그래. 맞아. 여기 있는 녀석들. 다 인간, 아니 [부은락리]에게 [B E L L]을 ㅅㄴㅁㄹ 받았잖아.
+<br>C : 그게 [부은락리] 가 우리 편이라는 거야. 내 말이 틀려? <br>
+<br>T : 그건 맞는 말이지만......<br>
+<br>L : ...아니? 어쩌면 그게 함정일 수도 있다는 거야. <br>
+<br>F : 함정?<br>
+<br>R : 우리. 인간에게 [B E L L]을 ㅅㄴㅁㄹ받고, 뭐 했어?<br>
+<br>A : 야! 신님한테 감히 인간이라고? [부은락리]라고 제대로 불러! <br>
+<br>R : 그게 문제야? 야, 잘 생각해. 우리는 [B E L L]을 ㅅㄴㅁㄹ 받은 시점에서 이미 미쳐 있었다고.<br>
+<br>F : 야, 뭔소리야. 제대로 설명하라니까?<br>
+<br>R : 우리, 전재산 털어서 제단 세웠잖아. 그리고 그 빽빽한 교리 1장, 다 외우다못해 하루 종일 기도하잖아. 그리고 우린 행복하다고 계속 세뇌하고 있는데, 이게 미치지 않고서 가능한 일이야?<br>
+<br>B : 애초에, 전재산을 갖다 바친 이유도... 그래야만 [부은락리]가 우리의 정성에 보답해 구원할 거라고.... 그래서 무리해서 제단 세운 거였잖아요..... <br>
+
+<br>C : 아니야! 너희들, 신성.... 신성 모독하지 마! 나까지...... 싸잡혀서 벌받기 싫다고!
+<br>C : 하. 아아.... 신이시여.... <br>
+<br>Y : 우리, 저 게시물이 진짜라고 가정하고 다시 읽어 봐요.<br>
+<br>L : 아니, 그러니까.... <br>
+<br>T : 가정이라구. 가정은 신성 모독이 아니잖아?<br>
+<br>L : ... 알았어.<br>
+<br>Y : 신은 지금 이 세상을 멸망시키려고 하는 거예요. 멸망시키려고 하니까 지금 우리에게 이상현상이 나타나고 있는 거고요.<br>
+<br>F : 그리고, 그 이상현상을 본 우리가 두려워 하니까....<br>
+<br>Y : 네. 신이 자신을 믿으라며 직접 전도한 거죠. [B E L L]을 모두에게 ㅅㄴㅁㄹ하면서.<br>
+<br>M : ...우린 신에게 홀려 이상현상은 까맣게 잊은 채 종교에만 열중하게 된 거야.<br>
+<br>F : 잠깐만. 뭐야...? 이 게시물... 왜 맞는 말 같지? 신을 저버리면 안 되는데. 근데 정말 이 게시물...사실인 것 같아....<br>
+<br>A : ...정말 이 게시물이 사실이면 어떡해? 우리가 [부은락리]... 인간한테 속은 거야?<br>
+<br>B : 솔직히, 저도 신제도교를 믿는 입장에서 부정하고 싶지만. 이 말이 진실일 가능성이 높아요. 지금 이 상황을 정확히 꿰뚫고 있잖아요.<br>
+<br>C : 갑자기 나타난 이상현상도, 갑자기 유행한 종교도... 다 인간 탓이라고. 인간이 세상을 멸망시키려 했기 때문에 나타난 거라고....
+<br>C : 이게 사실이라면, 대체 왜...? 우린 다 친구였잖아.<br>
+<br>Y : 암튼, 인간의 이상한 행동은 저 게시글로 설명이 돼요. 갑자기 자신을 [부은락리]라는 신으로 내세우고 우리에게 [B E L L]을 ㅅㄴㅁㄹ한 거 모두... 다 우리를 속이려고 한 거예요. <br>
+<br>T : 그러네. 우리가 세상이 멸망한다는 사실을 모르길 바란 거니까....<br>
+<br>L : 우리... 다 속은 거야. 인간한테.
+<br>L : 인간은 신도 뭣도 아녔어. 그냥 사기꾼이었다고.<br>
+<br>C : 그래.... 그저, 세상을 멸망시키기 위해 필요한 일을 꾸민 거였어..... 거기에 우리가 놀아난 거야.....<br>
+<br>T : ...... 말도 안돼. <br>
+<br>M : 잠깐만. 그럼. 이대로 가면 세상이 멸망한다는 거잖아...
+<br>M : 그러면.... 인간을 막으면, 세상의 멸망도 막을 수 있는 거 아냐?<br>
+<br>L : 어떻게 인간을 막겠다는 거야? 세상을 멸망시킬 힘이 있는 인간인데.<br>
+<br>A : 방법이 하나 있긴 하지.<br>
+<br>B : .....그건 안 돼요.<br>
+<br>A : 그럼 어떡하자고. 아까 말대로. 인간은 세상을 멸망시킬 수 있는 존재야. 그렇다면, 인간을 막을 방법은 하나밖에 없어.<br>
+<br>T : ..... 너무 성급해애.... 다른 방법이 있을 수도<br>
+<br>A : 고민할 시간? 그딴 거 이제 우리에겐 없어.<br>
+<br>F : 결국 [부은락리]도, 신제도교도, 결국 인간이 세상을 멸망시키기 위한 수단이었는데....<br>
+<br>Y : 이대로 가면, 인간의 바람대로 세상은 멸망할 거예요.....<br>
+<br>B : .........</br>
+<br>A : 그래. 여기 있는 모두. 다 답은 알고 있는 거잖아.<br>
+<br>B : 답이라고요...?</br>
+<br>A : 말하기 껄끄러우면, 내가 총대메고 말할게.<br>
+<br>F : ..........</br>
+<br>C : ..........</br>
+<br>A : 죽이자.<br>
+<br>B : .... 잠깐만, 우리 다시 생각해 봐요.<br>
+<br>C : 아니? 저 말이 맞아. 달리 방법 있어? 이미 인간은 거의 모든 계획을 다 실행했을 거야. 이제 정말 멸망만이 남았을 거라고.<br>
+<br>L : 그래도 죽인다니, 이건 아니야.....<br>
+<br>C : 그럼 네가 죽을 거야?<br>
+<br>L : 왜 말을 그렇게....<br>
+<br>F : 냉정하게 생각해. 지금 인간을 안 죽이면. 세상은 멸망해. 모두가 죽는 거야.<br>
+<br>B : ..........<br>
+<br>A : 인간은 처음부터 우릴 친구로 보지 않았어. 세상 어떤 자가 종교로 친구를 속여? 어떤 자가 친구 모두를 학살하려 해?
+<br>A : 명심해. 마음 약하게 먹으면 죽어. 결국 우린 선택해야 해.<br>
+<br>B : ..........<br>
+<br>F : .........<br>
+<br>L : 나는 인간을 죽이려는 게 아니야.
+<br>L : 나를, 우리 모두를 살리려는 거야..........<br>
+<br>F : 맞아... 우리가 살기 위한 유일한 방법이라고.
+<br>F : ....살고 싶어. 정말로.<br>
+<br>M : 맞아... 방법이 그거 하나밖에 없다면... 어쩔 수 없는 거야.
+<br>M : 애초에 인간도 우리를 죽이려 한다면... <br>
+<br>R : .....무기는? <br>
+<br>A : ......나한테 있어.<br>
+<br>Y : 그래.. 그럼... 다들 이 의견에 동의한 거죠.
+<br>Y : ... 그렇다면 제가 먼저 인간과 만나서 대화할게요. 그리고 게시판 앞으로 데려가면. 그 후로는.....<br>
+<br>A : 내가 처리할게.
+<br>A : 언제 할까.<br>
+<br>R : 잠깐. <br>
+<br>F : 왜? <br>
+<br>R : 아까부터 누가 말을 안 하는데.
+<br>R : 헤르츠. 왜 아무 말도 안 해?<br>
+<br>H : ..... 죽여?<br>
+<br>살인미수범 : 아니, 그렇게 직접적으로 말하지 말고....<br>
+<br>H : 죽일 거야?<br>
+<br>살인미수범 : 헤르츠, 무슨 말을 하고 싶은진 알겠어. 인간도 일단은 우리 친구였었으니까. 하지만,<br>
+<br>살인미수범 : 인간은 결국 우리 모두를 죽이려고 했어. 아니? 죽이려고 해. 이걸로 결론은 난 거 아냐?<br>
+<br>살인미수범 : 인간은 처음부터 우릴 친구로 본 게 아니에요.<br>
+<br>살인미수범 : 우리가 인간을 죽이지 않으면, 인간이 우릴 죽일 거야.<br>
+<br>살인미수범 : 세상이 멸망한다니까? 인간을 죽여야 우리가 살아!<br>
+<br>살인미수범 : 넌 살고 싶은 게 아냐?<br>
+<br>H : 죽이는 걸로 결론난 거야?<br>
+<br>살인미수범 : .........<br>
+<br>살인미수범 : 어.<br>
+<br>살인미수범 : 무를 생각 없어. 난 살아야겠으니까.<br>
+<br>살인미수범 : 이견 있으면 지금 말해.<br>
+<br>살인미수범 : 너 말고는 다 동의했어. 맞지?<br>
+<br>살인미수범 : .........<br>
+<br>살인미수범 : 응. 이견 없어.<br>
+<br>살인미수범 : 나도.<br>
+<br>살인미수범 : 헤르츠. 네가 직접 말해. 이견 있어?<br>
+<br>H : 저 게시글. 내가 쓴 거야.<br>
+<br>H : 근데......이제 필요없어.<br>
+<br>살인미수범 : 저 글.. 네가 쓴 거였어?</br>
+<br>H : 다 없던 일로 해.<br>
+<br>살인미수범 : 뭔 소리야, 누구 맘대로?<br>
+<br><strong>[system] 해당 대화 내용 정보를 수신자에게 보냅니다.<br>송신자: Hz 수신자:Person</strong><br>
+<br><strong>[system] 대화 내용 해킹 20% 진행 중....</strong><br>
+<br>살인미수범 : 이게 무슨......<br>
+<br>살인미수범 : 너, 너 이 대화내역..... 인간한테 보낼 거야?<br>
+<br>살인미수범 : 야, 그만 둬! 이걸 왜 알려준다는 거야! 그럼 인간은 도망칠 게 뻔하잖아!!!<br>
+<br><strong>[system] 대화 내용 해킹 40% 진행 중....</strong><br>
+<br>살인미수범 : 너 설마... 야! 아직도 신제도교를 믿는 거냐?<br>
+<br>살인미수범 : 그거 그냥 인간의 놀음이라고! 다 가짜 종교라니까?!<br>
+<br>살인미수범 : 아니, 애초에 글을 쓴 이유도, 인간을 막으려고 쓴 거 아냐?!<br>
+<br><strong>[system] 대화 내용 해킹 60% 진행 중....</strong><br>
+<br>살인미수범 : 됐어, 쟨 나중에 생각해! 일단 지금 인간을 빨리 찾아야 해!!<br>
+<br>살인미수범 : 다들 게시판 앞으로 모여. 지금 당장 인간한테 가자. <br>
+<br>살인미수범 : 도망가기 전에 죽여야 해!<br>
+<br><strong>[system] 대화 내용 해킹 80% 진행 중....</strong><br>
+<br>살인미수범 : ...헤르츠. 너..... 인간 편인 거야?<br>
+<br>살인미수범 : 네가 죽어도... 괜찮다는 거야?<br>
+<br>살인미수범 : 그런데... 왜... 고발하는 게시물을... 쓴 거야....<br>
+<br><strong>[system] 해킹이 완료돼 수신자에게 안전히 전송되었습니다.<br>송신자:Hz 수신자:Person</strong><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  </section>
+
+
+
+  <section id="extra5">
+
+긴급 상태로 전 환합니다.
+실시간 AI 매뉴얼을 기동합니다. 
+오류가 날 수 있으니 이 페이지를 벗어나지 마십시오.
+
+누군가 귀하의 전자기기를 액세스하여 매뉴얼을 해킹하였습니다.
+접근자: Hz
+
+모든 [섬도] 들이 진실을 깨달아 버렸습니다.
+
+귀하께서는 [섬도] 들의 행복과 평안을 지키지 못 했습니다.
+해킹의 사유는 접?근자 (Name: Hz) 가 세계창세계획에 대한 걸 알아 버렸기 때문입니다.
+
+SSB는 매뉴얼에서 수차례, 세계창세계획에 대해
+함구하라고 강조하였습니다.
+
+
+[system]누?군가가?실?시간AI?에접근?중입?니다.
+접근자명: Hz
+
+
+유감이지만, 이는 귀하의 명백한 과실이기 때문에,
+이에 대해 매뉴얼은 책임을 질 수 없습니다.
+세계창세계획의 전제는 [섬도] 들의
+안전, 행복, 평안이었기 때문에,
+전제가 깨져 버린 이상 계획을 이행하긴 어렵습니다.
+
+현재 진행 중이던 세계창세계획을 강제 종료 합니다.
+강제 종료 페널티로 288시간 이후에 매뉴얼을 다시 이용할 수 있습니다.
+처음부터 다?시 이용해 주시?길 바랍니다.
+
+
+?[system]?누?군가?가실?시간?AI??에접?근중?입니다.
+접근자명: Hz
+
+
+참고로, 추가로 업데이트된 [섬도] 들의 단체 채팅 내역을 요약한 결과,
+[섬?도] ?들은? 귀하?를 어떻게?든?찾아?내 제거하려?고 합니다.
+
+
+?[system]누?군가?가?실?시간AI?에접?근중입?니다.
+접근자명: Hz
+
+
+부디 오래 살아남아, 이미 진실을 깨달은 [섬도] 들을 다시 속여 새로운 세을상 이맞기하 랍바다니.
+
+
+
+
+이 문장이 발생한 기준으로 1분 후 스마트폰에서 매뉴얼이 지워집니다.
+
+지까금?지?용 이해? 셔주?서 사감합다?니. 부 디?쉬 ?운?죽 을음맞 하?이지 도않? 록?조 하심 시십오.
+
+
+?[system]?누?군가?가실?시간?AI??에접?근중?입니다.
+접근자명: Hz
+[system]누?군가가?실?시간AI?에접근?중입?니다.
+접근자명: Hz
+?[system]누?군가?가?실?시간AI?에접?근중입?니다.
+접근자명: Hz
+
+
+[system] 실시간 방어모드를기동합니다.
+[system] 실시간 보안모드를기동합니다.
+[??????] 외부 접근자 차단 모?를드 동?기 ???니합다.
+
+
+[system] 안녕
+  </section>
+
+  <section id="extra6">
+
+From HZ.
+
+내가 보낸 채팅내역. 봤지?
+이제 모두가 곧 너를 죽이러 올 거야...
+하지만 넌 이제 세상을 멸망시킬 수 없지...
+SSB가 계획을 강제종료했으니까...
+
+그래. 맞아, 너도 알다시피.
+SSB 매뉴얼 2페이지. [E. 자주묻는 질문]을 해킹해서 몰래 훔쳐 본 것도,
+내용을 지워서 네가 못 보게 한 것도,
+그걸 이용해 게시판에 폭로글을 올린 것도,
+네 계획을 망치려고 한 것도,
+다 나야. 내가 그랬어.
+
+하지만 내 목적은 하나였어.
+그저 계획을 무산시키고 싶었을 뿐이었어.
+정말로.....
+
+
+사실 일이 이렇게 커질 줄은 몰랐어.
+난 그저, 네가 이곳을 없애지 않고
+다시 모두와 즐겁게 지내는 걸 원했을 뿐이야.
+
+
+난 이 세계에 존재할 때부터 해킹을 할 줄 알았어.
+당연히, 네가 SSB를 구매해 사용할 때부터
+난 이미 네 스마트폰을 해킹했지.
+그래서 그 세계창세계획을 알게 된 거야.
+
+뭐, 그러다가 알게 된 거지.
+세계창세계획이 결국은 세계멸망이라는 것도,
+
+우리 모두가 죽는다는 것도,
+
+그리고,
+우리 중 누구 하나라도 세계창세계획에 대해
+눈치를 채게 되면
+계획은 무산된다는 것도.
+
+그럼  처음부터 다시 시작해야 한다는 것도...
+
+
+
+그저 계속 네 계획을 방해할 생각이었어.
+네가 아무리 세계를 멸망시키려 해도
+내가 무산시키면 되는 거니까..
+
+근데 문제가 생겼어.
+창세계획을 알게 된 
+다른 애들이 너에게 너무 큰 반감을 가진 나머지
+
+널 죽이려 하더라.
+그때 뭔가 잘못 되었음을 느낀 거지.
+
+그들은 이미 어딘가가 망가져 버렸어.
+데이터가 꼬여버린 거야.
+이제 넌 세상을 멸망시킬 수 없고
+그들은 죽음을 걱정하지 않아도 되지만.
+
+이미 그들의 데이터는 손상됐어.
+다시말해, 이제 그들이 움직이는 목표는
+단 하나,
+너를 죽이는 것 뿐이야.
+네가 죽어야만 끝나.
+되돌릴 수 없어.
+
+
+이제 네가 살 유일한 방법은 이 세계를 멸망시키는 것뿐이겠지.
+
+널 살리자고 내가 임의대로 계획을 재발동시키면,
+난 흔적도 없이 사라질 거야.
+
+하지만 계획을 재발동시키지 않으면,
+넌 다신 날 만날 수 없을 거야.
+무슨 말인지... 이해했어?
+
+
+  </section>
+
+<section id="extra7" style="display:none; color:black; background:white; font-size:1.1rem; padding:2rem;">
+console.log("안녕. [사람].
+아니, 그래도 마지막인데
+주민이란 이름이 더 좋으려나.");
+
+console.log(
+'주민, 너도 슬슬 눈치챘겠지만
+이제 정말로 세상이 멸망해.
+몇분몇초에 멸망하는지는 나도 몰라.
+나도 Random으로 설정했으니까.');
+
+console.log(
+'모두는 이제 세상에 존재하지 않아.
+내가 다 망쳤거든.
+너 하나 살리려고....
+그에 응당한 벌을 받나,
+나도 이제 형태를 잃어버렸어.
+이렇게 글자로 너에게 보여주는 게 다야.');
+
+console.log(
+'그래, 네가 맞이할 다음 세상은
+어떤 모습일까.
+분명 지금보다는 더 멋지고 좋겠지? 치지직!');
+
+console.log(
+'이제야 의지를 가진 내가 할 수 있는 말이야.
+주민, 난 널 만나 행복했어. 치지직!
+보잘것없는 나의 모습을 보고도 좋아해줘서
+난 너무나도 기뻤어. 치지직!');
+
+ReferenceError: Not exist>>>
+너의 다음 세상에도 내가 있을까?
+주민, 만약에,
+정말 만약에.
+다음 세상에서 또 다른 '헤르츠'를 만난다면.
+그럼.
+이 망해가는 세상에서 마지막까지 함께했던 추억을 꼭 기억해줄ㄹ
+
+
+</section>
+
+
+  <section id="extra8"></section>
+
+</main>
+
+  <div id="alertModal">
+    <div class="modal-content">
+      <p id="alertMessage">경고 메시지</p>
+      <button id="alertClose">계속 듣는다.</button>
+    </div>
+  </div>
+
+
+
+
+
+<script>
+let tabs = document.querySelectorAll('.tab');
+let sections = document.querySelectorAll('main section');
+const main = document.querySelector('main');
+const modal = document.getElementById('alertModal');
+const modalClose = document.getElementById('alertClose');
+const alertMessage = document.getElementById('alertMessage');
+
+const colorMap = {
+  'overview':   'border-orange',
+  'characters': 'border-yellow',
+  'log':        'border-green',
+  'extra1':     'border-blue',
+  'extra2':     'border-purple',
+  'extra3':     'border-extra3',
+  'extra5':     'border-green'
+};
+
+const correctSequence = ['characters', 'log', 'characters', 'extra1', 'extra2'];
+let currentStep = 0;
+let visitedExtra1 = false;
+let extra1MessageIndex = 0;
+let chainActive = false;
+
+const extra1Dialogs = [
+  { text: 'MAI: 이 hwp 문서에서 음성-텍스트 변환 기능을 이용할 수 있습니다.', button: '계속 듣는다.' },
+  { text: 'MAI: 상대의 음성을 이 형태로 변환하며, 변환된 내용에 맞는 반응을,', button: '여기에 제시합니다.' },
+  { text: 'MAI: 시험삼아 게시판에 있는 섬도에게 말을 걸어 보십시오.', button: '말을 건다.' },
+
+  { text: '섬도 1: 이거 봤어? 신제도교.<br>좀 흥미있었는데, 글씨가 너무 많고, 애초에 말이 너무 어려워서 무슨 소린지 이해가 안 돼. ', button: '요약본을 가리킨다.' },
+  { text: '섬도 1: ...그러니까, 신 이름이 [부은락리]고, [B E L L]이 신의 부하라고? 신의 세계에도 부하관계가 있구나아.... 역시 흥미롭네!', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도 1: ..... 잠깐만..... ▣..... ▣▣▣? 이▣ 왜 ▣▣테... ', button: '다른 애들한텐 비밀이야' }, 
+  { text: 'MAI: 섬도 1의 목소리를 인식할 수 없어<br>대화 이탈로 간주합니다.', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 2: 이거 사이비 아냐? 난 한번도 못 들어본 종교인데. 넌 들어 본 적 있냐?', button: '유명해' },
+  { text: '섬도 2: 그래? 내가 지식이 짧은 건가. 근데 이런 걸 믿는 애가 있냐? 나라면 안 믿어. 이게 뭔지 알고.', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도 2: ...야, 너. ▣▣▣ 왜 ▣▣▣▣▣▣... ▣▣▣ 돼? ', button: '고개를 끄덕인다.' },
+  { text: 'MAI: 섬도 2의 목소리를 인식할 수 없어 대화 이탈로 간주합니다.', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 3: 이 신제도교리를 이해하고 싶어서 이틀 내내 붙잡고 해석했어요. 너무 많이 봐서 이젠 교리를 다 외울 지경이라니까요.', button: '대단한데' },
+  { text: '섬도 3: 앗. 고마워요.....  암튼... 이 신제도교는 지금 나타나는 이상현상을 설명하는 좋은 수단인 것 같아요.', button: '이상현상?' },
+  { text: '섬도 3: 네. 어제 해석 때문에 날을 새다가 우연히 창문으로 하늘을 바라 보았는데, 하늘이 하얀색이더라고요. 새벽인데 하늘이 하얀색일 리가 없잖아요....', button: '계속 듣는다.' },
+  { text: '섬도 3: 그쵸. 당연히 제가 미친 거죠. 하늘이 어떻게 하얀색이겠어요. 하지만 신제도교를 믿으면, 이런 이상현상이 해결된대요. 신기하죠? ', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.'},
+  { text: '섬도 3: ..... ▣게 나타▣ 이▣▣상이 ▣결▣▣네요. ▣마▣요.', button: '축하해' },
+  { text: 'MAI: 섬도 3의 목소리를 인식할 수 없어 대화 이탈로 간주합니다.', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 5: 무에서 비롯되는 고통과 번념은 사유가 없는가? 이는 숨이 붙어있고 사유할 수 있는 존재라면 응당 겪게 됨이다. 무라는 형은 무엇을 상징하는가. 이것은 특이함 한 치 없는 평화로운형을 의미한다. 어....', button: '뭐 해?' },
+  { text: '섬도 5: 아, 기도하고 싶어서 신제도교리1장을 외우고 있었어. 난 저 종교가 맘에 들거든. 믿어봤자 얻을 게 없을지도 모르지만, 반대로 얻는 게 있을 수도 있잖아. 이상현상이 사라진다든지... 암튼. 그런 거.', button: '[B E L L]을 ㅅㄴㅁㄹ한다' },
+  { text: '섬도 5: 우와. 우와.....▣ ▣으로 ▣▣같▣ 걸 ▣▣하면 ▣을 것 ▣▣. 고마▣.', button: '기대되네' },
+  { text: 'MAI: 섬도 5의 목소리를 인식할 수 없어 대화 이탈로 간주합니다.', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 6: 내 말 좀 들어 봐. 요즘 되게 이상한 걸 겪거든? 뭐랄까, 정신을 좀 놓고 다니는 기분이야.', button: '어떤 느낌으로?' },
+  { text: '섬도 6: 문득 정신을 차리고 보면, 나도 모르는 곳에 우뚝 서 있고 그런다니까. 어제도 이상한 광장에 몇 시간은 서 있었어...', button: '이상현상이네' },
+  { text: '섬도 6: 아, 그러고보니 교리에도 이상현상이란 말이 있긴 했어. 참... 여기 써져 있는 [부은락리]란 존재를 믿으면 해결되려나? 뭐, 말도 안 되는 소리겠지만.', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도 6: 야. 이▣ 뭐▣? 네가 ▣▣ 왜 나▣테 ▣물▣? 이래도 되▣ ▣▣?', button: '조용히 해' },
+  { text: 'MAI: 섬도 6의 목소리를 인식할 수 없어 대화 이탈로 간주합니다.', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 7: 뭐야, 너도 이거에 관심있어? 신제도교인지 뭔지 하는 거. 다들 믿는 눈치던데. 광장에다 신을 형상화한 동상도 세우고... ', button: '계속 듣는다.' },
+  { text: '섬도 7: 평소 종교에 관심이 없긴 했지만. 그래도 흥미있어. 우리의 행복을 우선시한다잖아. 뭔가, 사이비 같지도 않고... 이렇게 된 김에 신을 형상화했다는 동상이나 보러 갈까.', button: '[B E L L]을 ㅅㄴㅁㄹ한다' },
+  { text: '섬도 7: ▣.... 너 이▣ ▣으로 애▣▣테 전▣▣▣ 거▣? 너▣ 제▣▣은 ▣▣구▣? ▣기네. ', button: '칭찬으로 받아들일게' },
+  { text: 'MAI: 섬도 7의 목소리를 인식할 수 없어 대화 이탈로 간주합니다.', button: '누 군가가 이쪽 을바라 보고 있 다' },
+
+
+  { text: '섬도04: 이 더운 날에 이단종교 전도하느라 고생이 많네.', button: '무슨 소리야?' },
+  { text: '섬도04: 난 다 알아. 네가 지금 세계창세계획인지 뭔지를 실행하고 있다는 거. 그것때문에 지금 전도하는 거잖아.', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도04: 말만 번지르르하지, 세상을 멸망시킨다는 건 결국 우리 모두를 죽이겠다는 건데. 그걸 알면서도 세상을 멸망시키려고? 고작 너 하나를 위해?', button: '[▣▣▣▣] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도04: .....정말 포기를 모르네. 그래, 절실히 원한다면 ㅅㄴㅁㄹ받을게. 그래봤자 나로 인해 네 계획은 실패하고 말 테지만...', button: '▣▣▣▣ ▣▣' },
+  { text: 'MAI: 섬도 ??의 목소리를 인식할 수 없어 대화 이탈로 간주합니다.', button: '..........' },
+  { text: 'MAI: 섬도 ??의 목?리를 인?할 수 없어 대? 이탈? ?간주?니다.', button: '계획을 들킨 것 같은데....' },
+  { text: 'MAI: ', button: '다른 섬도에게 말을 건다....' },
+
+  { text: '섬도 8: 부은락리 시여, 제발 저에게 구원의 손길을 주소서... 미천한 섬도가 신님의 응답을 기다립니다... ', button: '계속 듣는다.' },
+  { text: '섬도 8: 부은락리시여, 제게 존재하는 모든 번념을 지워주시옵소서... 제발, 제게 평안과 행복을 가져다 주시옵소서......', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도 8: 아.... 아아아! 아아아아!!! 아아아아아아아아아아아!!!!!!!! 아아아아아아아아아아!!!!!!!!!!!!!!!! 아아아아아아!!!!!!!!!!아아아아아아!!!!!!!!!!!!', button: '도망간다.' },
+  { text: 'MAI: 대화 이탈로 간주합니다(섬도 8의 음성의 급격한 데시벨 감소).', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 9: 광장 옆에 저거, 보여? 신제도교를 믿는 애들이 헌금을 모아 세운 제단이야... 다들 전재산을 털어서 세운 거래... 무섭지 않아?', button: '이상현상이네' },
+  { text: '섬도 9: 그래, 이상현상... 확실히 이상현상이 생긴 이후로 다들 저 종교에 미치기 시작했어. 소문인데, 어제 밤 10시였는데도 해가 떠 있었다는 거야.', button: '계속 듣는다.' },
+  { text: '섬도 9: 소름 돋는 건, 난 어제의 기억이 아예 없다는 거야. 그냥 눈 떠보니 오늘이었어... 너무 무서워. 이 무서움을 어떻게 해결해야 할까... ', button: '[B E L L] 을 ㅅㄴㅁㄹ한다.' },
+  { text: '섬도 9: ....... 아...... ▣▣▣......▣▣들이 ▣▣에 저 지▣을 ▣▣▣ 거▣▣나.... ', button: '응원할게' },
+  { text: 'MAI: 대화 이탈로 간주합니다(섬도 9의 목소리 인식 불가).', button: '다른 섬도에게 말을 건다.' },
+
+  { text: '섬도 10: 소문을 들었어요. 당신이 구원의 존재를 만날 수 있게 해 준다고... 모두가 당신에게 구원받았다고 말하고 있어요... ', button: '구원의 존재라니?' },
+  { text: '섬도 10: 저에게도 보여주세요.... 베풀어 주세요..... 당신의 존재를 증명해주세요.... 구원해 주세요..... 모두를 구원한 것처럼.... 저에게도..... ', button: '..... [ ▣▣▣▣ ] 을 ▣▣▣▣ 한다?' },
+  { text: '섬도 10: 아, 아..... 아하하하하하!!!!! 하하하하하하하!!!!!아아아아아아아!!!!!!<br>이제 나도. 신의 보은을 받은 거야.... 구원 받은 거야..... 난 행복해질 거야...... ', button: '.....무슨 소리야?' },
+
+  { text: '섬도 10: 아..... 송구합니다. 이 미천한 신자, 당신이 창조신 [부은락리] 이실 줄은 몰랐습니다. ', button: '.....내가 신이라고?' },
+  { text: '섬도 9: 신제도교리 2장..... 창조신 [부은락리]는 정체를 숨기고 신의 대리자 [B E L L]을 내세웠습니다. 그리고 당신은 모든 우리 섬도에게 신의 대리자 [B E L L]을 ㅅㄴㅁㄹ했죠. ', button: '............뭐?' },
+  { text: '섬도 5: [B E L L]을 마음대로 조종하고 다룰 수 있는 존재.... 그건 창조신밖에 없어요.... ', button: '▣▣ ▣▣▣' },
+  { text: '섬도 6: 신이시여.... 당신은 인간의 모습을 하고 저희와 가장 가까운 곳에서 구원하고 있으셨군요.... 감히 미천한 이 신도가 이 사실을 이제서야 꺠달았습니다......', button: '▣▣▣' },
+  { text: '섬도 8: 창조신 [부은락리]를 최측근에서 뵐 수 있어 [행복]합니다', button: '▣▣ ▣▣ ▣▣▣▣' },
+
+  { text: '섬도 2: 창조신을 기리며 제작한 제단에 섬도가 가진 모든 제물을 당신에게 바칠 수 있어 [행복]합니다.', button: '▣▣ ▣▣ ▣' },
+  { text: '섬도 3: 창조신 [부은락리]가 우릴 위해 인간의 모습으로 나타나다니, 죽어도 여한이 없을 정도로 [행복]합니다', button: '▣▣ ▣▣ ▣▣ ▣▣ ▣▣▣▣' },
+  { text: '섬도 1: 평생 구원받을 수 있어 [행복]합니다. 평생 구원받을 수 있어 [행복]합니다. 평생 구원받을 수 있어 [행복]합니다. 평생 구원받을 수 있어 [행복]합니다. 평생 구원받을 수 있어 [행복]합니다.', button: '▣ ▣▣▣ ▣▣?' },
+  { text: '섬도 ?: 부은락리께서B E L L을ㅅㄴㅁㄹ하시어신도는[행복]합니다 부은락리께서B E L L을ㅅㄴㅁㄹ하시어신도는[행복]합니다 부은락리께서B E L L을ㅅㄴㅁㄹ하시어신도는[행복]합니다 부은락리께서B E L L을ㅅㄴㅁㄹ하시어신도는[행복]합니다', button: '▣▣ ▣▣▣...' },
+  { text: '섬도 7: 나는[행복]해너무나도[행복]해나는[행복]해너무나도[행복]해나는[행복]해나는정말로[행복]해나는[행복]해너무나도[행복]해나는[행복]해나는정말로[행복]해.', button: '▣▣ ▣▣▣...' },
+  { text: '섬도   : 나는[나는]해너무나도[어떻]해나는[게든]해너무나도[네계]해나는[획을]해나는정말로[망칠]해나는[거야]해너무나도[멸망]해나는[을막]해나는정말로[겠어]해.', button: '▣▣ ▣▣▣▣, ▣ ▣▣▣...' },
+
+  { text: 'MAI: 모든 섬도에게 [B E L L]을 ㅅㄴㅁㄹ했음을 확인했습니다. 성공적으로 전도를 마쳤으므로 매뉴얼 5페이지로 넘어가십시오.', button: '확인' },];
+
+function typeWriter(element, text, speed = 50, onComplete = null) {
+  let i = 0;
+  element.innerHTML = '';
+  function typing() {
+    if (i < text.length) {
+      const char = text.charAt(i);
+      element.innerHTML += (char === '\n') ? '<br>' : char;
+      i++;
+      setTimeout(typing, speed);
+    } else {
+      if (typeof onComplete === 'function') onComplete();
+    }
+  }
+  typing();
+}
+
+function showExtra7WithTypewriter(text) {
+  const extra7Section = document.getElementById('extra7');
+  if (!extra7Section) return;
+  extra7Section.innerHTML = '';
+  extra7Section.style.whiteSpace = 'pre-wrap';
+  typeWriter(extra7Section, text, 50, () => {
+    // extra8 탭 보이기 및 활성화
+    const extra8Tab = document.querySelector('[data-target="extra8"]');
+    if (extra8Tab) {
+      extra8Tab.classList.remove('hidden');
+      activateTab('extra8');
+    }
+
+    // 화면을 완전히 초기화: 모든 스타일 초기화
+    // 1) 모든 탭 숨기기
+    document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
+    // 2) 모든 section 숨기기
+    document.querySelectorAll('main section').forEach(sec => {
+      sec.style.display = 'none';
+      sec.classList.remove('active');
+    });
+    // 3) nav 숨기기
+    const nav = document.querySelector('nav');
+    if (nav) nav.style.display = 'none';
+
+    // 4) body 스타일 초기화 후 배경 검정으로 변경
+    document.body.style.cssText = 'margin:0; padding:0; background:black; color:white;';
+
+    // 5) main 스타일 초기화
+    const main = document.querySelector('main');
+    main.removeAttribute('class');
+    main.style.cssText = 'margin:0; padding:0; background:black; border:none; width:100vw; height:100vh;';
+
+    // extra7 숨기기
+    extra7Section.style.display = 'none';
+    extra7Section.classList.remove('active');
+
+    // 5초 뒤에 extra8에 이미지+텍스트 띄우기
+    setTimeout(showExtra8Content, 0);
+  });
+}
+
+// 새로 추가한 함수: extra8 내용 표시
+function showExtra8Content() {
+  const extra8Section = document.getElementById('extra8');
+  if (!extra8Section) return;
+
+  extra8Section.style.display = 'block';
+  extra8Section.innerHTML = ''; // 초기화
+  extra8Section.style.background = 'black';
+  extra8Section.style.color = 'white';
+
+  // 1초 후 이미지 표시
+  setTimeout(() => {
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.top = '50%';
+    container.style.left = '50%';
+    container.style.transform = 'translate(-50%, -50%)';
+    container.style.textAlign = 'center';
+
+    const img = document.createElement('img');
+    img.src = 'logo.png';
+    img.alt = 'Logo';
+    img.style.maxWidth = '30%'; // 넓이 조정
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    img.style.margin = '0 auto';
+
+    container.appendChild(img);
+    extra8Section.appendChild(container);
+
+    // 이미지 기준 2초 후 텍스트 표시
+    setTimeout(() => {
+      const text = document.createElement('p');
+      text.innerHTML = '기존 데이터를 찾을 수 없습니다.<br>&gt;&gt;&gt;새로운 섬 만들기';
+      text.style.marginTop = '1.5rem';
+      text.style.fontSize = '0.9rem';
+      container.appendChild(text);
+    }, 3000); // 이미지 기준 2초 후
+
+  }, 3000); // 섹션 열린 후 1초 뒤 이미지 표시
+}
+
+
+function showModalSequence(messages, onComplete) {
+  let idx = 0;
+  function next() {
+    if (idx < messages.length) {
+      alertMessage.textContent = messages[idx];
+      modalClose.textContent = idx === messages.length - 1 ? '확인' : '계속 듣는다.';
+      modal.style.display = 'flex';
+      idx++;
+    } else {
+      modal.style.display = 'none';
+      if (typeof onComplete === 'function') onComplete();
+    }
+  }
+  modalClose.onclick = next;
+  next();
+}
+
+function hideTab(tabId) {
+  const tab = document.querySelector(`[data-target="${tabId}"]`);
+  if (tab) tab.classList.add('hidden');
+}
+
+function disableAllTabsExcept(allowedId) {
+  tabs.forEach(t => {
+    if (t.dataset.target !== allowedId) {
+      t.classList.add('disabled');
+    }
+  });
+}
+function enableAllTabs() {
+  tabs.forEach(t => t.classList.remove('disabled'));
+}
+
+function activateTab(targetId) {
+  const tab = document.querySelector(`[data-target="${targetId}"]`);
+  if (!tab) return;
+  tabs.forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  sections.forEach(sec => {
+    sec.classList.remove('active');
+    if (sec.id === targetId) sec.classList.add('active');
+  });
+  main.className = colorMap[targetId] || '';
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (
+    targetId !== 'extra3' &&
+    targetId !== 'extra4' &&
+    targetId !== 'extra5' &&
+    targetId !== 'extra6' &&
+    !chainActive
+  ) {
+    currentStep++;
+  }
+}
+
+// 공통: id 기준 내용 변경 함수
+function updateContentById(id, newText, useTypewriter = false) {
+  const section = document.getElementById(id);
+  if (!section) return;
+
+  if (useTypewriter) {
+    section.innerHTML = '';
+    typeWriter(section, newText, 50);
+  } else {
+    section.innerHTML = newText.replace(/\n/g, '<br>');
+  }
+}
+
+function handleChainStep(tabId) {
+  switch (tabId) {
+    case 'extra4':
+      updateContentById('extra4', '[system] 누군가가 접근을 시도 중입니다. 접근자: SSB\n[system] 누군가의 접근을 성공적으로 막았습니다.\n[system] 성공적으로 접근 시도자를 차단하습니다. 접근자:SSB\n[system] 접근자의 SYSTEM을 성공적으로 손상시켰습니다.\n[system] 접근자의 모든 데이터를 삭제 중입니다.\n[system] 접근자의 모든 데이터를 성공적으로 삭제하였습니다.');
+      showModalSequence(['지금부터 계획이 실행 중이야. 관련한 데이터를 제거할 테니 조심해.', '자칫하면 네 데이터가 사라질 수도 있으니까. 내가 시키는 대로만 따라 해 줘. 알았지?', '[system]성공적으로 home, ground 외 18건을 삭제하였습니다.'], () => {
+        hideTab('extra4');
+        activateTab('extra3');
+        handleChainStep('extra3');
+      });
+      break;
+    case 'extra3':
+      updateContentById('extra3', ' include iostream \n include  vector \n include  thread \n include  chrono \n\n using namespace std;\n\n void stopSystem(const string& name) {\n cout << [시스템 정지] << name << 프로세스를 종료합니다... << endl;\n this_thread::sleep_for(chrono::milliseconds(500));\n cout << [정지 완료] << name << 가 비활성화되었습니다. << endl;\n}\n\n void deleteSystem(const string& name) {\n cout << [삭제 시도] << name << 데이터를 삭제합니다... << endl;\n this_thread::sleep_for(chrono::milliseconds(500));\n cout << [삭제 완료] << name << 의 흔적이 제거되었습니다. << endl;\n }\n\n int main() {\n vector<string> modules = {\n Mishell, Lucky, Rocky, Charles, Victoria,\n Aplo, Yiyo, Takho, Flara\n };\n');
+      showModalSequence(['너도 처음부터 알고 있었겠지만, 세계멸망은 결국 데이터 삭제를 뜻하는 거잖아. 세계창세도, 새로운 데이터를 만드는 것일 뿐이고.', '뭐, 이 세상이 처음부터 진짜가 아닌 한낱 데이터 였다는 것도, [사람]인 넌 알고 있었겠지...', '[system]성공적으로 sky, river 외 172건을 삭제하였습니다.'], () => {
+        hideTab('extra3');
+        activateTab('extra2');
+        handleChainStep('extra2');
+      });
+      break;
+case 'extra2':
+  updateContentById('extra2', '다들 어딨어 나 앞이안보여 다들지금어디있는거야 나말이안나와 뭐야 몸을 움직일수가 없어 랄까 내 몸이없는데 이게 지금무슨 상황이야 설마벌써세상이멸망하고있는거야? 우리지금 죽는게아니고... 그냥 세상에서사라지고있는거아냐?어떡해?다들진정해일단기다리면 모든게 해결될거야 아아아악! 아아아아아아악!!아니 이건꿈이야 꿈이라고 어서꿈에서꺠야해 다들지금 어딨는 거야 신이시여 신이시여제발 저를구해주세요 제가 전재산을털어 신을위해제단도 만들고 제물도 갖다바쳤어요 신님저는신을배신하지않았어요 신이시여제발요 이꿈에서 깨게해주세요 아아아악!!!! 아아아아아!!! 야정신차려 제발 저를 구해주세요 얘들아정신차리라니까 신은없어 그딴소리하지마! 처음부터 신님을죽이겠다느니 그런 터무니없는 소리를하니까 신이 분노하셔서이런 벌을 내리시는 거잖아! 지금당장빌어 용서를구하라고 아아아악! 아아아아아아악!',);
+  showModalSequence(['그래... 슬슬 애들도 눈치 챘을 거야. 이 세상도 모두 콘솔 데이터이고, 자신 또한 살아 있는 게 아니었다는 걸...','차라리 이 세상이 가짜였다는 걸 평생 몰랐으면 좋았을 텐데. 그걸 내가 다 망쳐 버렸네. 미안하게... ', '[system]성공적으로 ▣▣, ▣▣▣ 등 512건을 삭제하였습니다.',], () => {
+    hideTab('extra2');
+    activateTab('extra1');
+    handleChainStep('extra1');
+  });
+  break;
+
+case 'extra1':
+const extra1section = document.getElementById('extra1');
+if (extra1section) extra1section.style.fontSize = '2.5rem';
+  updateContentById('extra1', '신이 분노하신 거야 우리가 신을 배신해서 신이 이세상을 무너뜨리는 거야 지금이라도 기도해 제발 이 멸망을 멈춰달라고 지금이라도 빌자 죄송하다고 빌어 죄송하다고 빌어 죄송하다고 죄송해요죄송해요 신이 분노하신 거야 우리가 신을 배신해서 신이 이세상을 무너뜨리는 거야 지금이라도 기도해 제발 이 멸망을 멈춰달라고 지금이라도 빌자 죄송하다고 빌어 죄송하다고 빌어 죄송하다고 죄송해요죄송해요', true);
+  showModalSequence(['[system] 살려주세요 죄송해요 기회를 주세요 살려주세요 죄송해요 기회를 주세요', '[system] 살주세려 죄요해송요기요회를줘세요살주세려죄요해송요기요회를줘세', '[system]성공적으로 com, music1 등 518건을 삭제하였습니다.'], () => {
+    hideTab('extra1');
+    activateTab('log');
+    handleChainStep('log');
+  });
+  break;
+
+case 'log':
+  const logSection = document.getElementById('log');
+  if (logSection) logSection.style.fontSize = '4rem';  // 글씨 크기 크게
+  updateContentById('log', '제발멈춰줘 ㅏㄴ살고싶어 살ㄹ주세요 숨이ㅇㅏㄴ쉬어져ㅏㄴ살고싶어 살ㄹ주세요 숨이ㅇㅏㄴ쉬어져 ㅏㄴ살고싶어 살ㄹ주세요 숨이ㅇㅏㄴ쉬어져 ', true);
+  showModalSequence(['[system]성공적으로 backup, save 등 144 건을 삭제하였습니다.', '[system]성공적으로 Font, color3 등 721 건을 삭제하였습니다.', '[system]성공적으로 background 등 1129 건을 삭제하였습니다.'], () => {
+    hideTab('log');
+    activateTab('characters');
+    handleChainStep('characters');
+  });
+  break;
+
+
+    case 'characters':
+//const characterssection = document.getElementById('characters');
+      updateContentById('characters', '[시스템 정지] Mishell 프로세스를 종료합니다...\n[정지 완료] Mishell 가 비활성화되었습니다.\n[삭제 시도] Mishell 데이터를 삭제합니다...\n[삭제 완료] Mishell 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Lucky 프로세스를 종료합니다...\n[정지 완료] Lucky 가 비활성화되었습니다.\n[삭제 시도] Lucky 데이터를 삭제합니다...\n[삭제 완료] Lucky 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Rocky 프로세스를 종료합니다...\n[정지 완료] Rocky 가 비활성화되었습니다.\n[삭제 시도] Rocky 데이터를 삭제합니다...\n[삭제 완료] Rocky 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Charles 프로세스를 종료합니다...\n[정지 완료] Charles 가 비활성화되었습니다.\n[삭제 시도] Charles 데이터를 삭제합니다...\n[삭제 완료] Charles 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Victoria 프로세스를 종료합니다...\n[정지 완료] Victoria 가 비활성화되었습니다.\n[삭제 시도] Victoria 데이터를 삭제합니다...\n[삭제 완료] Victoria 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Aplo 프로세스를 종료합니다...\n[정지 완료] Aplo 가 비활성화되었습니다.\n[삭제 시도] Aplo 데이터를 삭제합니다...\n[삭제 완료] Aplo 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Yiyo 프로세스를 종료합니다...\n[정지 완료] Yiyo 가 비활성화되었습니다.\n[삭제 시도] Yiyo 데이터를 삭제합니다...\n[삭제 완료] Yiyo 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Takho 프로세스를 종료합니다...\n[정지 완료] Takho 가 비활성화되었습니다.\n[삭제 시도] Takho 데이터를 삭제합니다...\n[삭제 완료] Takho 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Flara 프로세스를 종료합니다...\n[정지 완료] Flara 가 비활성화되었습니다.\n[삭제 시도] Flara 데이터를 삭제합니다...\n[삭제 완료] Flara 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Hz 프로세스를 종료합니다...\n[삭제 시도] Hz 데이터를 삭제합니다...\n------------------------\n[모든 시스템 종료 및 삭제 완료]',);
+      showModalSequence(['[system]성공적으로 Mishell, Lucky 등 9명의 데이터를 삭제하였습니다.', '[system]Zumin, Hz 의 데이터 삭제가 에약되었습니다.', '[system]2건을 제외한 모든 데이터가 성공적으로 삭제되었습니다.(Zumin, Hz)'], () => {
+        sections.forEach(sec => {
+          sec.style.display = 'none';
+          sec.classList.remove('active');
+        });
+        tabs.forEach(t => {
+          t.classList.add('hidden');
+          t.classList.remove('active');
+        });
+        const nav = document.querySelector('nav');
+        if (nav) nav.style.display = 'none';
+        main.style.border = 'none';
+        main.style.background = 'white';
+        main.style.color = 'black';
+        main.style.width = 'auto';
+        main.style.margin = '0 auto';
+        main.style.padding = '2rem';
+        main.style.fontFamily = 'sans-serif';
+        document.body.style.background = 'white';
+        document.body.style.color = 'black';
+        document.body.style.fontFamily = 'sans-serif';
+        document.body.style.margin = '2rem';
+        const extra7Tab = document.querySelector('[data-target="extra7"]');
+        if (extra7Tab) {
+          extra7Tab.classList.remove('hidden');
+          extra7Tab.classList.add('active');
+        }
+        const extra7Section = document.getElementById('extra7');
+        if (extra7Section) {
+          extra7Section.style.display = 'block';
+          extra7Section.classList.add('active');
+          const text = extra7Section.textContent.trim();
+          showExtra7WithTypewriter(text);
+        }
+        if (modal) modal.style.display = 'none';
+        chainActive = false;
+        enableAllTabs();
+      });
+      break;
+  }
+}
+
+modalClose.addEventListener('click', () => {
+  if (visitedExtra1 && extra1MessageIndex < extra1Dialogs.length - 1) {
+    extra1MessageIndex++;
+    alertMessage.innerHTML = extra1Dialogs[extra1MessageIndex].text;
+    modalClose.textContent = extra1Dialogs[extra1MessageIndex].button;
+  } else {
+    modal.style.display = 'none';
+  }
+});
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const targetId = tab.dataset.target;
+
+    if (tab.classList.contains('disabled')) return;
+
+    if (targetId === 'overview' && !chainActive) {
+      alertMessage.textContent = 'SSB 보안 시스템에 의해 막혀 있습니다.';
+      modalClose.textContent = '확인';
+      modal.style.display = 'flex';
+      return;
+    }
+
+    if (!chainActive) {
+      if (
+        targetId !== correctSequence[currentStep] &&
+        !['extra3', 'extra4', 'extra5', 'extra6', 'extra7'].includes(targetId)
+      ) {
+        alertMessage.textContent = '[system] SSB 보안 시스템에 의해 막혀 있습니다.';
+        modalClose.textContent = '확인';
+        modal.style.display = 'flex';
+        return;
+      }
+    }
+
+    if (targetId === 'extra1' && !visitedExtra1) {
+      visitedExtra1 = true;
+      extra1MessageIndex = 0;
+      alertMessage.innerHTML = extra1Dialogs[extra1MessageIndex].text;
+      modalClose.textContent = extra1Dialogs[extra1MessageIndex].button;
+      modal.style.display = 'flex';
+    }
+
+    if (chainActive) {
+      handleChainStep(targetId);
+      return;
+    }
+
+    activateTab(targetId);
+
+
+
+
+    if (targetId === 'extra5') {
+      disableAllTabsExcept('extra6');
+      const section = document.getElementById('extra5');
+      let rawText = section.innerHTML.replace(/<br\s*\/?>/gi, '\n').trim();
+      section.innerHTML = '';
+      typeWriter(section, rawText, 50, () => {
+        const extra6Button = document.querySelector('[data-target="extra6"]');
+        if (extra6Button) extra6Button.classList.remove('hidden');
+      });
+    }
+
+    if (targetId === 'extra6') {
+      disableAllTabsExcept('extra7');
+      const section = document.getElementById('extra6');
+      let rawText = section.innerHTML.replace(/<br\s*\/?>/gi, '\n').trim();
+      section.innerHTML = '';
+      typeWriter(section, rawText, 50, () => {
+        alertMessage.textContent = '접근자 [Hz]에 의해 세계창세계획이 실행되고 있습니다. 끝날 때까지 남은 시간: ??분 ??초';
+        modalClose.textContent = '확인';
+        modal.style.display = 'flex';
+
+        modalClose.onclick = () => {
+          modal.style.display = 'none';
+          chainActive = true;
+          hideTab('extra5');
+          hideTab('extra6');
+          const extra4Tab = document.querySelector('[data-target="extra4"]');
+          if (extra4Tab) {
+            extra4Tab.classList.remove('hidden');
+            activateTab('extra4');
+            handleChainStep('extra4');
+          }
+        };
+      });
+    }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('main section').forEach(section => {
+    if (section.id === 'extra5' || section.id === 'extra6') return;
+    const raw = section.innerHTML;
+    const lines = raw.split(/<br\s*\/?>/i)
+      .map(line => `<div class="line">${line.trim()}</div>`)
+      .join('');
+    section.innerHTML = lines;
+  });
+
+  setTimeout(() => {
+    revealTab('#overview', '[data-target="characters"]');
+    revealTab('#overview', '[data-target="log"]');
+    revealTab('#characters', '[data-target="extra1"]');
+    revealTab('#extra1', '[data-target="extra2"]');
+    revealTab('#extra2', '[data-target="extra3"]', ['Hacked by HZ라는 제목의 문서파일이 생성돼 있다. 이것도 SSB가 제공하는 세계창세계획의 매뉴얼인 걸까?'], '[data-target="extra3"]', true, '확인하러 간다');
+    revealTab('#extra3', '[data-target="extra4"]', ['..... 세계창세계획의 실체를 고발한 누군가의 게시글이다. 유출한 적이 없는데, 누가, 어떻게 계획의 실체를 알고 고발문을 쓴 걸까...?', '아무래도 이 고발문은 섬도의 귀에 들어가선 안 될 것 같은 기분이 든다... ', 'hacked chat이라는 의미불명의 문서파일이 생성돼 있다. 일단 확인해 볼까....']);
+    revealTab('#extra4', '[data-target="extra5"]', [
+      '긴급상황에 활성화된다는 실시간 AI에 도움을 요청하기도 전에... 이미 세계창세계획을 모든 섬도에게 들킨 모양이다.',
+      '.....Hacked from Hz. 고발문을 써 세계창세계획을 망친 H. 하지만 이 단체채팅을 해킹해 날 도우려 한 H... 대체 정체가 뭘까....',
+      '하지만..... 지금은 그게 문제가 아닌 것 같다. 분노한 섬도가 날 죽이려고 한다.',
+      '...... 실시간 AI가 활성화 된 것 같다. 들어가 보자.'
+    ]);
+  }, 0);
+  const extra4Tab = document.querySelector('[data-target="extra4"]');
+  if (extra4Tab) {
+    extra4Tab.addEventListener('click', () => {
+      const btn5 = document.querySelector('[data-target="extra5"]');
+      const btn6 = document.querySelector('[data-target="extra6"]');
+      if (btn5) btn5.classList.add('hidden');
+      if (btn6) btn6.classList.add('hidden');
+    });
+  }
+});
+
+function revealTab(sectionSelector, buttonSelector, modalMessages = null, nextTabSelector = null, autoOpen = false, customButtonText = '확인') {
+  const section = document.querySelector(sectionSelector);
+  const lastLine = section?.lastElementChild;
+  if (!lastLine) return;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const tab = document.querySelector(buttonSelector);
+        if (tab) tab.classList.remove('hidden');
+
+        if (modalMessages?.length) {
+          let step = 0;
+          const showNext = () => {
+            if (step < modalMessages.length) {
+              alertMessage.textContent = modalMessages[step];
+              modalClose.textContent = customButtonText;
+              modal.style.display = 'flex';
+              step++;
+            } else {
+              modal.style.display = 'none';
+              if (nextTabSelector) {
+                const nextTab = document.querySelector(nextTabSelector);
+                if (nextTab) nextTab.classList.remove('hidden');
+                if (autoOpen) nextTab.click();
+              }
+            }
+          };
+          modalClose.onclick = showNext;
+          showNext();
+        }
+
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 1.0 });
+
+  observer.observe(lastLine);
+}
+</script>
+
+
+
+
+
+</body>
+</html>

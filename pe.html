@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>페르소나 4</title>
+  <style>
+    body {
+      font-family: 'Malgun Gothic', sans-serif;
+      background-color: #0a0a0a;
+      color: #fafafa;
+    }
+
+    h1 {
+      color: #ffd700;
+    }
+
+    #container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .button {
+      background-color: #222;
+      color: #ffd700;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>페르소나 4</h1>
+
+  <div id="container">
+    <img id="img1" src="img/naru.png" alt="페르소나 4 이미지" />
+    <div class="text">
+      <p><strong>페르소나 4</strong>: 현대 일본의 작은 시골 마을 이나바 시에서 벌어지는 기묘한 연쇄살인을 다룬 RPG 게임.</p>
+      <p><strong>'비오는 날 0시, 티비에 나오는 사람은 죽게 된다?'</strong></p>
+      <p>이나바 시에는 기괴한 괴담이 존재한다. 비오는 날 0시, 티비에 운명의 사람이 나타난다는 것이다.</p>
+      <p>하지만, 어쩐지 티비에 비치는 사람들이 하나씩 죽어 나가는데.</p>
+      <p>이 기괴한 연쇄살인 사건을 야소가미 고등학교 학생들이 파헤쳐 나가려 한다.</p>
+      <p>나루카미 유우, 하나무라 요스케, 타츠미 칸지, 곰 출연.</p>
+
+      <button class="button" onclick="toggleVisibility('img1')">VIEW</button>
+      <a href="javascript:history.back()" class="button">← 돌아가기</a>
+    </div>
+  </div>
+
+  <script>
+    // 이미지 토글
+    function toggleVisibility(id) {
+      const dom = document.getElementById(id);
+      dom.style.visibility = (dom.style.visibility === 'visible') ? 'hidden' : 'visible';
+    }
+
+    prompt("가장 재밌을 것 같은 게임은 무엇인가요?");
+  </script>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>베리드스타즈</title>
+  <style>
+    body {
+      font-family: 'Malgun Gothic', sans-serif;
+      background-color: #1a1a1a;
+      color: #ffcccc;
+    }
+
+    h1 {
+      color: #ff4d4d;
+    }
+
+    #box {
+      display: flex;
+      gap: 20px;
+    }
+
+    #img1 {
+      max-width: 500px;
+      height: auto;
+    }
+
+    .button {
+      background-color: #222;
+      color: #ff6666; 
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>베리드스타즈</h1>
+
+  <div id="container">
+    <img id="img1" src="img/bes.png" alt="페르소나 4 이미지" />
+    <div class="text">
+      <p><strong>베리드 스타즈</strong>: 가수 프로그램 베리드 스타즈에서 벌어진 사고와 사건에서의 연관성을 찾아내야 하는 추리 게임.</p>
+      <p><strong>'무대가 무너졌고, 우리는 갇혔다.</strong></p>
+      <p>가수였던 사람, 연습생, 일반인 모두가 참여할 수 있는 음악 서바이벌 프로그램, 베리드 스타즈.</p>
+      <p>승자 발표를 남겨둔 최종 라운드 도중, 무대가 무너지고 말았다!</p>
+      <p>무대에 갇히고 만 최종 라운드의 top5 5명과 fd 1명. 그런데, 무너진 무대 공간 안에서 시신이 발견되고 말았다.</p>
+      <p>그런데, 시신에 타살의 흔적이 있다?</p>
+      <p>하지만 무너진 무대에 출구가 있을 리 없고. 그렇다는 것은 6명 중 살인자가 있다는 것인데...</p>
+      <p>한도윤, 이규혁 출연.</p>
+
+      <button class="button" onclick="toggleVisibility('img1')">VIEW</button>
+      <a href="javascript:history.back()" class="button">← 돌아가기</a>
+    </div>
+  </div>
+
+  <script>
+    function toggleVisibility(id) {
+      const dom = document.getElementById(id);
+      dom.style.visibility = (dom.style.visibility === 'visible') ? 'hidden' : 'visible';
+    }
+  </script>
+
+</body>
+</html>
+
+
+
+

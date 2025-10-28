@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>야생의숨결</title>
+  <style>
+    body {
+      font-family: 'Malgun Gothic', sans-serif;
+      background-color: #1a1a1a;
+      color: #d8b3ff;
+    }
+
+    h1 {
+      color: #9933ff;
+    }
+
+    #b {
+      display: flex;
+      gap: 20px;
+    }
+
+    .button {
+      background-color: #222;
+      color: #b366ff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>젤다의 전설 야생의 숨결</h1>
+
+  <div id="container">
+    <img id="img1" src="img/li.png" alt="야숨" />
+    <div class="text">
+      <p><strong>젤다의 전설: 야생의 숨결</strong>: 젤다의 전설 11번째 시리즈: Breath of the Wild</p>
+      <p><strong>'일어나세요, 용사여.'</strong></p>
+      <p>100년만에 깨어난 용사, 링크.</p>
+      <p>눈을 떴을 때, 왕국 하이랄은 이미 멸망한 상태였다.</p>
+      <p>공주 젤다는 무너지려는 세상을 막고 있었다.</p>
+      <p>링크는 어서 젤다를 도우러 가야 하지만, 가논에게 힘을 빼앗긴 나머지, 약해져 버린 상태.</p>
+      <p>힘을 되찾기 위해서는, 조력자를 찾아야만 한다.</p>
+      <p>링크, 가논, 젤다 출연.</p>
+
+      <button class="button" onclick="toggleVisibility('img1')">VIEW</button>
+      <a href="javascript:history.back()" class="button">← 돌아가기</a>
+    </div>
+  </div>
+
+  <script>
+    function toggleVisibility(id) {
+      const dom = document.getElementById(id);
+      dom.style.visibility = (dom.style.visibility === 'visible') ? 'hidden' : 'visible';
+    }
+  </script>
+
+</body>
+</html>
+
