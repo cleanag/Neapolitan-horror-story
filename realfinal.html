@@ -102,7 +102,7 @@ font-size: 2rem;
 .tab.disabled {
   pointer-events: none;       /* 클릭, 호버 모두 막기 */
   cursor: not-allowed;        /* 마우스 커서를 금지 표시로 */
-  opacity: 0.5;               /* 희미하게 보여서 비활성 느낌 추가 가능 */
+  opacity: 0.5;               /* 희미하게 */
 }
 
     section {
@@ -126,7 +126,7 @@ font-size: 2rem;
 button[data-target="extra5"],
 button[data-target="extra6"] {
   background: red;
-  color: white; /* 글자색도 필요하면 바꿔주세요 */
+  color: white; 
 }
 
 
@@ -967,21 +967,21 @@ function showExtra7WithTypewriter(text) {
     }
 
     // 화면을 완전히 초기화: 모든 스타일 초기화
-    // 1) 모든 탭 숨기기
+    //모든 탭 숨기기
     document.querySelectorAll('.tab').forEach(t => t.classList.add('hidden'));
-    // 2) 모든 section 숨기기
+    //모든 section 숨기기
     document.querySelectorAll('main section').forEach(sec => {
       sec.style.display = 'none';
       sec.classList.remove('active');
     });
-    // 3) nav 숨기기
+    // nav 숨기기
     const nav = document.querySelector('nav');
     if (nav) nav.style.display = 'none';
 
-    // 4) body 스타일 초기화 후 배경 검정으로 변경
+    // body 스타일 초기화 후 배경 검정으로 변경
     document.body.style.cssText = 'margin:0; padding:0; background:black; color:white;';
 
-    // 5) main 스타일 초기화
+    //main 스타일 초기화
     const main = document.querySelector('main');
     main.removeAttribute('class');
     main.style.cssText = 'margin:0; padding:0; background:black; border:none; width:100vw; height:100vh;';
@@ -1017,7 +1017,7 @@ function showExtra8Content() {
     const img = document.createElement('img');
     img.src = 'logo.png';
     img.alt = 'Logo';
-    img.style.maxWidth = '30%'; // 넓이 조정
+    img.style.maxWidth = '30%'; 
     img.style.height = 'auto';
     img.style.display = 'block';
     img.style.margin = '0 auto';
@@ -1146,7 +1146,7 @@ if (extra1section) extra1section.style.fontSize = '2.5rem';
 
 case 'log':
   const logSection = document.getElementById('log');
-  if (logSection) logSection.style.fontSize = '4rem';  // 글씨 크기 크게
+  if (logSection) logSection.style.fontSize = '4rem';  // 글씨 크기 크게크게
   updateContentById('log', '제발멈춰줘 ㅏㄴ살고싶어 살ㄹ주세요 숨이ㅇㅏㄴ쉬어져ㅏㄴ살고싶어 살ㄹ주세요 숨이ㅇㅏㄴ쉬어져 ㅏㄴ살고싶어 살ㄹ주세요 숨이ㅇㅏㄴ쉬어져 ', true);
   showModalSequence(['[system]성공적으로 backup, save 등 144 건을 삭제하였습니다.', '[system]성공적으로 Font, color3 등 721 건을 삭제하였습니다.', '[system]성공적으로 background 등 1129 건을 삭제하였습니다.'], () => {
     hideTab('log');
@@ -1157,7 +1157,6 @@ case 'log':
 
 
     case 'characters':
-//const characterssection = document.getElementById('characters');
       updateContentById('characters', '[시스템 정지] Mishell 프로세스를 종료합니다...\n[정지 완료] Mishell 가 비활성화되었습니다.\n[삭제 시도] Mishell 데이터를 삭제합니다...\n[삭제 완료] Mishell 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Lucky 프로세스를 종료합니다...\n[정지 완료] Lucky 가 비활성화되었습니다.\n[삭제 시도] Lucky 데이터를 삭제합니다...\n[삭제 완료] Lucky 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Rocky 프로세스를 종료합니다...\n[정지 완료] Rocky 가 비활성화되었습니다.\n[삭제 시도] Rocky 데이터를 삭제합니다...\n[삭제 완료] Rocky 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Charles 프로세스를 종료합니다...\n[정지 완료] Charles 가 비활성화되었습니다.\n[삭제 시도] Charles 데이터를 삭제합니다...\n[삭제 완료] Charles 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Victoria 프로세스를 종료합니다...\n[정지 완료] Victoria 가 비활성화되었습니다.\n[삭제 시도] Victoria 데이터를 삭제합니다...\n[삭제 완료] Victoria 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Aplo 프로세스를 종료합니다...\n[정지 완료] Aplo 가 비활성화되었습니다.\n[삭제 시도] Aplo 데이터를 삭제합니다...\n[삭제 완료] Aplo 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Yiyo 프로세스를 종료합니다...\n[정지 완료] Yiyo 가 비활성화되었습니다.\n[삭제 시도] Yiyo 데이터를 삭제합니다...\n[삭제 완료] Yiyo 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Takho 프로세스를 종료합니다...\n[정지 완료] Takho 가 비활성화되었습니다.\n[삭제 시도] Takho 데이터를 삭제합니다...\n[삭제 완료] Takho 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Flara 프로세스를 종료합니다...\n[정지 완료] Flara 가 비활성화되었습니다.\n[삭제 시도] Flara 데이터를 삭제합니다...\n[삭제 완료] Flara 의 흔적이 제거되었습니다.\n------------------------\n[시스템 정지] Hz 프로세스를 종료합니다...\n[삭제 시도] Hz 데이터를 삭제합니다...\n------------------------\n[모든 시스템 종료 및 삭제 완료]',);
       showModalSequence(['[system]성공적으로 Mishell, Lucky 등 9명의 데이터를 삭제하였습니다.', '[system]Zumin, Hz 의 데이터 삭제가 에약되었습니다.', '[system]2건을 제외한 모든 데이터가 성공적으로 삭제되었습니다.(Zumin, Hz)'], () => {
         sections.forEach(sec => {
